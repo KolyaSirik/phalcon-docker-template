@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+source docker/config.sh
+
+docker-compose -f ${FILE} build
+docker-compose -f ${FILE} stop
+docker-compose -f ${FILE} up -d

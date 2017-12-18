@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  nginx:
+    extends:
+      file: common-compose.yml
+      service: nginx
+    volumes:
+      - ../app:/www
+      - ./nginx/dev/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - php
+    container_name: example_project_dev_nginx
+
+  php:
+    extends:
+      file: common-compose.yml
+      service: php
+    build:
+      context: ./php/dev
+      args:
+        USER_ID: "${USER_ID}"
+    volumes:
+      - ../app:/www
+      - ./php/dev/deploy.sh:/deploy.sh
+      - ./php/dev/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/dev/php.ini:/usr/local/etc/php/php.ini
+    links:
+      - mysql
+    environment:
+      XDEBUG_CONFIG: "remote_host=${MY_IP_ADDR}"
+      PHP_IDE_CONFIG: "serverName=nginx"
+    container_name: example_project_dev_php
+
+  mysql:
+    extends:
+      file: common-compose.yml
+      service: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example_project_dev
+      MYSQL_USER: example_project_dev
+      MYSQL_PASSWORD: example_project_dev
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    container_name: example_project_dev_mysql

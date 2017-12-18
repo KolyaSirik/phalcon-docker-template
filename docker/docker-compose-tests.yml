@@ -1,0 +1,44 @@
+version: '2'
+
+services:
+  nginx:
+    extends:
+      file: common-compose.yml
+      service: nginx
+    volumes:
+      - ../app:/www
+      - ./nginx/dev/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - php
+    container_name: example_project_test_nginx
+
+  php:
+    extends:
+      file: common-compose.yml
+      service: php
+    build:
+      context: ./php/tests
+      args:
+        USER_ID: "${USER_ID}"
+    volumes:
+      - ../app:/www
+      - ./php/tests/deploy.sh:/deploy.sh
+      - ./php/tests/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/tests/php.ini:/usr/local/etc/php/php.ini
+    links:
+      - mysql_test
+    environment:
+      XDEBUG_CONFIG: "remote_host=${MY_IP_ADDR}"
+      PHP_IDE_CONFIG: "serverName=nginx"
+    container_name: example_project_test_php
+
+  mysql_test:
+    extends:
+      file: common-compose.yml
+      service: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: example_project_test
+      MYSQL_USER: example_project_test
+      MYSQL_PASSWORD: example_project_test
+    container_name: example_project_test_mysql

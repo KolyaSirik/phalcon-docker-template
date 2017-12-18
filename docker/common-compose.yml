@@ -1,0 +1,15 @@
+version: '2'
+services:
+  nginx:
+    image: nginx:1.11.13-alpine
+    ports:
+      - '12421:80'
+  php:
+    volumes:
+     - "/etc/passwd:/etc/passwd:ro"
+    working_dir: /www/
+    environment:
+      ICU_DATA: "/opt/icu/"
+  mysql:
+     image: mariadb:10.1.22
+     restart: always

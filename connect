@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+source docker/config.sh
+docker-compose -f ${FILE} exec php bash

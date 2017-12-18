@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+TEST_CONTAINER="example_project_test_php"
+IS_CONTAINER_EXIST=$(docker ps --filter "name=$TEST_CONTAINER" --format "{{.ID}}")
+FILE='docker/docker-compose-tests.yml'
+START_DATE=$(date +%s)
+
+export MY_IP_ADDR=`hostname -I | sed 's/ .*//'`
+export USER_ID="`id -u`"
+export COMPOSE_PROJECT_NAME='example_project'
+
+function waitForDeploy {
+    while ! (docker logs ${TEST_CONTAINER} --since ${START_DATE} 2>&1 | grep "Your application is ready." >/dev/null 2>&1); do
+        echo "Waiting for deploy...";
+        sleep 1;
+    done
+}
+
+if [ $# -eq 1 ] && [ $1 == 'dev-mode' ] || [ -z ${IS_CONTAINER_EXIST} ]; then
+    ./deploy -e test
+    waitForDeploy
+fi
+
+while ! (docker-compose -f ${FILE} exec -T php sh -c "curl http://nginx -s > /dev/null"); do
+    echo "Waiting for php-fpm..."
+    sleep 1
+done
+
+docker-compose -f ${FILE} exec -T php sh -c "vendor/bin/codecept run --xml='report.xml' --colors"
+
+if [ $# -eq 1 ] && [ $1 == 'dev-mode' ]; then
+    docker-compose -f ${FILE} down
+fi
