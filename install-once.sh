@@ -10,7 +10,7 @@ if [ -z ${PROJECT_NAME} ] || [ -z ${PORT} ] ; then
 fi
 
 find app/apps/config -type f -exec sed -i "s/example_project/$PROJECT_NAME/g" {} +
-find config/common-compose.yml -exec sed -i "s/12421/$PORT/g" {} +
+find docker/common-compose.yml -exec sed -i "s/12421/$PORT/g" {} +
 find Readme.md -exec sed -i "s/12421/$PORT/g" {} +
 find Readme.md -exec sed -i "s/example_project/$PROJECT_NAME/g" {} +
 find Readme.md -exec sed -i "s/#### RUN \`.\/install-once.sh\` !!!//g" {} +
